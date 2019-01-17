@@ -6,6 +6,7 @@ planex-build-root
 *.pyc
 srpmutil/srpmutil
 *.swp
+*.egg-info/
 tags
 .coverage
 .hypothesis
