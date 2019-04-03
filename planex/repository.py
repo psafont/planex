@@ -73,19 +73,17 @@ class Repository(object):
         If the url is pointing to a tag, this will be the
         SHA1 of the commit tag is pointing to.
         """
-        if self.url.netloc in self.tag_to_sha1s:
-            to_sha1 = self.tag_to_sha1s[self.url.netloc]
-            self.sha1 = to_sha1(self, self.archive_at)
-
-        if not self.sha1 and self.url.netloc in self.branch_to_sha1s:
-            to_sha1 = self.branch_to_sha1s[self.url.netloc]
-            self.sha1 = to_sha1(self, self.archive_at)
-
         if not self.sha1 and self.url.netloc in self.commitish_to_sha1s:
             to_sha1 = self.commitish_to_sha1s[self.url.netloc]
-            self.sha1 = to_sha1(self, self.archive_at)
+        elif not self.sha1 and self.url.netloc in self.branch_to_sha1s:
+            to_sha1 = self.branch_to_sha1s[self.url.netloc]
+        elif self.url.netloc in self.tag_to_sha1s:
+            to_sha1 = self.tag_to_sha1s[self.url.netloc]
 
-        if not self.sha1:
+        try:
+            self.sha1 = '' if not to_sha1 else to_sha1(self, self.archive_at)
+        except requests.exceptions.RequestException as e:
+            logging.warning("Could not determine the hash: %s" % e)
             self.sha1 = ''
 
     def parse_github(self):
