@@ -54,21 +54,18 @@ def pty_check_call(cmd):
     This ensures isatty(3) will return 1.
     An exception is raised if the command exits with non-zero status.
     """
-    # python2.7 doesn't return the exitcode here:
-    pty.spawn(cmd)
-    # get exit status of first child
-    (pid, status) = os.waitpid(-1, 0)
+    status = pty.spawn(cmd)
     returncode = 1
     if status == 0:
         returncode = 0
     elif os.WIFEXITED(status):
         returncode = os.WEXITSTATUS(status)
-        print("PID %d exited with status %d" % (pid, returncode))
+        print("CMD '%s' exited with status %d" % (cmd, returncode))
     elif os.WIFSIGNALED(status):
         signal = os.WTERMSIG(status)
-        print("PID %d exited with signal %d" % (pid, signal))
+        print("CMD '%s' exited with signal %d" % (cmd, signal))
     else:
-        print("PID %d exited with non-zero status 0x%02x" % (pid, status))
+        print("CMD '%s' exited with non-zero status 0x%02x" % (cmd, status))
     if returncode > 0:
         raise subprocess.CalledProcessError(returncode, cmd)
 
@@ -107,7 +104,7 @@ def createrepo(pkg_dir, metadata_dir, quiet=False):
     Run createrepo.   Repository metadata will be created in
     metadata_dir/repodata.
     """
-    cmd = ['createrepo']
+    cmd = ['createrepo_c']
     cmd += ['--baseurl=file://%s' % pkg_dir]
     cmd += ['--outputdir=%s' % metadata_dir]
     cmd += [pkg_dir]

@@ -59,7 +59,7 @@ def parse_patchseries(series, guard=None):
     guard_re = re.compile(r'([\S]+)(\s#.*)?')
 
     for line in series:
-        line = line.strip()
+        line = line.strip().decode()
         if not line or line.startswith('#'):
             continue
 

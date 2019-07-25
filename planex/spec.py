@@ -9,6 +9,7 @@ import sys
 import tempfile
 
 from itertools import chain
+from functools import reduce
 
 
 from planex.blobs import Blob, GitBlob, Archive, GitArchive, \
@@ -351,16 +352,16 @@ class Spec(object):
                         for pkg in self.spec.packages], [])
 
         # RPM 4.6 adds architecture constraints to dependencies.  Drop them.
-        provides = [re.sub(r'\(x86-64\)$', '', pkg) for pkg in provides]
+        provides = [re.sub(r'\(x86-64\)$', '', pkg.decode()) for pkg in provides]
         return set(provides)
 
     def name(self):
         """Return the package name"""
-        return self.spec.sourceHeader['name']
+        return self.spec.sourceHeader['name'].decode()
 
     def version(self):
         """Return the package version"""
-        return self.spec.sourceHeader['version']
+        return self.spec.sourceHeader['version'].decode()
 
     # RPM runtime dependencies.   These are not required to build this
     # package, but will need to be installed when building any other
@@ -368,7 +369,7 @@ class Spec(object):
     def requires(self):
         """Return the set of packages needed by this package at runtime
            (Requires)"""
-        return set.union(*[set(p.header['REQUIRES'])
+        return set.union(*[set([foo.decode() for foo in p.header['REQUIRES']])
                            for p in self.spec.packages])
 
     # RPM build dependencies.   The 'requires' key for the *source* RPM is
@@ -376,7 +377,9 @@ class Spec(object):
     def buildrequires(self):
         """Return the set of packages needed to build this spec
            (BuildRequires)"""
-        return set(self.spec.sourceHeader['requires'])
+        converted = [foo.decode()
+                     for foo in self.spec.sourceHeader['requires']]
+        return set(converted)
 
     def source_package_path(self):
         """
@@ -388,7 +391,7 @@ class Spec(object):
         # package's name-version-release string.  Naming is not critically
         # important as these source RPMs are only used internally - mock
         # will write a new source RPM along with the binary RPMS.
-        srpmname = self.spec.sourceHeader['nvr'] + ".src.rpm"
+        srpmname = self.spec.sourceHeader['nvr'].decode() + ".src.rpm"
         return rpm.expandMacro(os.path.join('%_srcrpmdir', srpmname))
 
     def add_source(self, index, source):

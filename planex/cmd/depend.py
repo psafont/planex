@@ -168,7 +168,7 @@ def print_makefile_rules(args, allspecs, specs, provides_to_rpm):
     if args.verbose:
         print("# inputs: %s" % " ".join(allspecs))
 
-    for spec in specs.itervalues():
+    for spec in specs.values():
         print('# %s' % (spec.name()))
 
         build_srpm_from_spec(spec)
@@ -189,7 +189,7 @@ def print_makefile_rules(args, allspecs, specs, provides_to_rpm):
     # Generate targets to build all srpms and all rpms
     all_rpms = []
     all_srpms = []
-    for spec in specs.itervalues():
+    for spec in specs.values():
         rpm_path = spec.binary_package_paths()[-1]
         all_rpms.append(rpm_path)
         all_srpms.append(spec.source_package_path())
@@ -207,7 +207,7 @@ def print_to_json(specs, provides_to_rpm):
     Print the dependency graph as json to stdout.
     """
     deps = {}
-    for spec in specs.itervalues():
+    for spec in specs.values():
         rpmpath, buildreqs, reqs = buildrequires_for_rpm(spec, provides_to_rpm)
         brs = {
             os.path.basename(rpmpath): {

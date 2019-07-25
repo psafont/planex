@@ -75,12 +75,12 @@ def best_effort_file_verify(path):
         # output of `file` is of form: "<path>: <mime-type>"
         cmd = ["file", "--mime-type", path]
         stdout = run(cmd, check=False)['stdout'].strip()
-        _, _, mime_type = stdout.partition(': ')
+        _, _, mime_type = stdout.partition(b': ')
 
-        if SUPPORTED_EXT_TO_MIME[ext] != mime_type:
+        if SUPPORTED_EXT_TO_MIME[ext] != mime_type.decode():
             raise FetchVerifyError(
                 "%s: Fetched file format looks incorrect: %s: %s" %
-                (sys.argv[0], path, mime_type))
+                (sys.argv[0], path, mime_type.decode()))
 
 
 def parse_args_or_exit(argv=None):

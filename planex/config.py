@@ -3,7 +3,7 @@
 
 import os.path
 
-from ConfigParser import RawConfigParser
+from configparser import RawConfigParser
 
 
 class Configuration(object):
