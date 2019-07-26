@@ -42,13 +42,14 @@ mock -r "$MOCKCFG" --buildsrpm \
     --source "$HERE/dist" \
     --resultdir="$TMPDIR/SRPM"
 
-## Build a miniplanex. This is for Koji and other planes where none of
-## the mock/createrepo stuff is ever used.
 mkdir -p "$TMPDIR/RPM"
 echo "*** REBUILD SOURCE RPM ***"
 mock -r "$MOCKCFG" --rebuild \
-    --define "miniplanex 1" \
     --resultdir="$TMPDIR/RPM" "$TMPDIR/SRPM"/*.src.rpm
 
 echo "*** COPY PACKAGES TO dist/ ***"
 cp -v "$TMPDIR/RPM"/*.rpm "$HERE/dist/"
+
+echo "*** TEST INSTALL PACKAGES ***"
+mock -r "$MOCKCFG" --init
+mock -r "$MOCKCFG" --install $(ls -1 $HERE/dist/*.rpm | grep -v src.rpm)

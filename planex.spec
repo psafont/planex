@@ -3,46 +3,27 @@
 %global pkgname planex
 
 Summary: RPM build tool
-%if 0%{?miniplanex} > 0
-Name: miniplanex
-%else
 Name: %{pkgname}
-%endif
-Version: 4.3.3
+Version: 4.3.4
 Release: 1%{?dist}
 URL: http://github.com/xenserver/planex
 Source0: http://github.com/xenserver/planex/archive/v%{version}/%{pkgname}-%{version}.tar.gz
 License: LGPLv2.1
 BuildArch: noarch
-BuildRequires: python-setuptools
-Requires: git
-%if 0%{?fedora} >= 27
-Requires: python2-GitPython
-Requires: python2-argcomplete
-Requires: rpm-python2
-%else
-Requires: GitPython
-Requires: python-argcomplete
-Requires: rpm-python
-%endif
 Requires: make
-## The main point of building with the miniplanex define is to turn off the requirement
-## of some things we don't want in the miniplanex environment used in koji builds.
-## This means some of the tools will not work, but that's fine because miniplanex
-## users will never call them.
-##
-## Amusing note, anyone rebuilding a "miniplanex" SRPM will get a full planex
-## back unless they too supply the miniplanex define. This is as it should be.
-%if 0%{?miniplanex} < 1
 Requires: createrepo
 Requires: mock
 Requires: yum-plugin-priorities
-%endif
 Requires: rpm-build
-Requires: python-argparse
-Requires: python-pathlib
-Requires: python-requests
-Requires: python-setuptools
+Requires: git
+Requires: python3-GitPython
+Requires: python3-argcomplete
+Requires: python3-rpm
+Requires: python3-pathlib2
+Requires: python3-libarchive-c
+Requires: python3-requests
+BuildRequires: python3-rpm-macros
+BuildRequires: python3-setuptools
 
 %description
 Planex is a tool for building collections of RPMs.
@@ -52,10 +33,10 @@ Planex is a tool for building collections of RPMs.
 
 %build
 sed -i "s/\(version='\)[^'\"]\+/\1%{version}-%{release}/g" setup.py
-%{__python} setup.py build
+%{__python3} setup.py build
 
 %install
-%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+%{__python3} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 %{__install} -D -m 644 planex/planex.bash %{buildroot}%{_sysconfdir}/bash_completion.d/planex.bash
 %{__install} -D -m 644 planex/Makefile.rules %{buildroot}%{_datadir}/planex/Makefile.rules
 
@@ -71,12 +52,16 @@ sed -i "s/\(version='\)[^'\"]\+/\1%{version}-%{release}/g" setup.py
 %{_bindir}/planex-init
 %{_bindir}/planex-make-srpm
 %{_bindir}/planex-pin
-%{python_sitelib}/planex
-%{python_sitelib}/planex-*.egg-info
+%{python3_sitelib}/planex
+%{python3_sitelib}/planex-*.egg-info
 %{_datadir}/planex/Makefile.rules
 %config%{_sysconfdir}/bash_completion.d/planex.bash
 
 %changelog
+* Fri Jul 26 2019 Tim Smith <tim.smith@citrix.com> - 4.3.4-1
+- Update to 4.3.4
+- Make it work with Python 3.7
+
 * Wed Apr  3 2019 Mark Syms <mark.syms@citrix.com> - 4.3.1-1
 - Enumerate dictionary keys and use REST to query archive commit ids
 
